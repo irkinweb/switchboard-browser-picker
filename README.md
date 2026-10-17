@@ -29,13 +29,38 @@ Use it to:
 
 ## Install
 
+### Option 1: Download the app
+
 1. Download `Switchboard.dmg` from the [latest release](../../releases/latest).
 2. Open it and drag Switchboard into Applications.
-3. Open Switchboard. The app isn't notarized yet, so macOS blocks the first launch. Click **Done**.
-4. Open **System Settings → Privacy & Security**, scroll down, and click **Open Anyway** next to the Switchboard message. Confirm with your password or Touch ID. You only do this once.
-5. Switchboard opens its Settings. Click **Make Default** and confirm the macOS prompt.
+3. Open Switchboard. Settings opens on first launch. Click **Make Default** and confirm the macOS prompt.
 
-Requires macOS 14 Sonoma or later. Runs on Apple Silicon and Intel.
+#### First launch: "Switchboard.app Not Opened"
+
+Switchboard isn't notarized by Apple, so the first time you open it macOS shows this. Click **Done**.
+
+<p align="center">
+  <img src="docs/first-launch-blocked.png" width="252" alt="macOS dialog: Switchboard.app Not Opened. Apple could not verify Switchboard.app is free of malware.">
+</p>
+
+Then open **System Settings → Privacy & Security**, scroll down to **Security**, and click **Open Anyway**. Confirm with Touch ID or your password, then click **Open**. You only do this once.
+
+<p align="center">
+  <img src="docs/first-launch-open-anyway.png" width="620" alt="System Settings, Privacy and Security: Switchboard.app was blocked to protect your Mac, with the Open Anyway button highlighted">
+</p>
+
+### Option 2: Homebrew (no security prompt)
+
+Homebrew builds Switchboard on your own Mac, so macOS never shows the dialog above.
+
+```bash
+brew install justadityaraj/tap/switchboard
+ln -sf "$(brew --prefix)/opt/switchboard/Switchboard.app" /Applications/Switchboard.app
+```
+
+Update later with `brew upgrade switchboard`.
+
+Requires macOS 14 Sonoma or later. The download runs on Apple Silicon and Intel.
 
 ## Settings
 
