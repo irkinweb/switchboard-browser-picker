@@ -24,3 +24,14 @@ if [[ "${1:-}" == "--install" ]]; then
   "$lsregister" -f /Applications/Switchboard.app
   echo "Installed /Applications/Switchboard.app"
 fi
+
+if [[ "${1:-}" == "--release" ]]; then
+  rm -f build/Switchboard.zip build/Switchboard.dmg
+  ditto -c -k --norsrc --noextattr --noqtn --keepParent "$app" build/Switchboard.zip
+  staging=$(mktemp -d)
+  cp -R "$app" "$staging/"
+  ln -s /Applications "$staging/Applications"
+  hdiutil create -volname Switchboard -srcfolder "$staging" -fs HFS+ -format UDZO -ov build/Switchboard.dmg >/dev/null
+  rm -rf "$staging"
+  echo "Packaged build/Switchboard.zip and build/Switchboard.dmg"
+fi
