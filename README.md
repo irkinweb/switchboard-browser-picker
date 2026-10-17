@@ -31,11 +31,9 @@ Use it to:
 
 1. Download `Switchboard.dmg` from the [latest release](../../releases/latest).
 2. Open it and drag Switchboard into Applications.
-3. The app is not notarized. Remove the quarantine flag once:
-   ```bash
-   xattr -dr com.apple.quarantine /Applications/Switchboard.app
-   ```
-4. Open Switchboard. Settings opens on first launch. Click **Make Default** and confirm the macOS prompt.
+3. Open Switchboard. The app isn't notarized yet, so macOS blocks the first launch. Click **Done**.
+4. Open **System Settings → Privacy & Security**, scroll down, and click **Open Anyway** next to the Switchboard message. Confirm with your password or Touch ID. You only do this once.
+5. Switchboard opens its Settings. Click **Make Default** and confirm the macOS prompt.
 
 Requires macOS 14 Sonoma or later. Runs on Apple Silicon and Intel.
 
