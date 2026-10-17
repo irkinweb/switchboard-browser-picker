@@ -1,8 +1,16 @@
-# Switchboard
+# Switchboard Browser Picker for Mac
 
-A small menu-bar app for macOS that decides which browser opens each link.
+**Open every link in the right browser, Chrome or Brave profile, or private window.** Switchboard is a free, open-source macOS menu-bar app that you set as your default browser. When you click a link in Slack, Mail, Notes or any other app, it either follows your rules or shows a quick browser picker at your cursor.
 
-Set Switchboard as your default browser. Every link you click then goes through it. It opens the link in the right browser, Chrome or Brave profile, or private window, or asks you with a quick picker at the cursor.
+Use it to:
+
+- open work links in your work Chrome profile and everything else in your personal one
+- choose which browser opens a link each time you click it
+- send Google Meet, Zoom or GitHub links to the browser you keep for them
+- open links from a specific app (like Slack) in a specific browser or profile
+- open some sites in a private or incognito window by default
+
+**[Download Switchboard](../../releases/latest)** · [Website](https://dev.adityarajsingh.com/switchboard/) · [Compare Mac browser pickers](https://dev.adityarajsingh.com/switchboard/comparison/)
 
 <p align="center">
   <img src="docs/picker.png" width="320" alt="The Switchboard picker showing Brave, three Chrome profiles and Safari">
@@ -90,8 +98,8 @@ To find an app's bundle ID, run `osascript -e 'id of app "Google Chrome"'`.
 You need Xcode 16 or later (Swift 6).
 
 ```bash
-git clone https://github.com/justadityaraj/switchboard.git
-cd switchboard
+git clone https://github.com/justadityaraj/switchboard-browser-picker.git
+cd switchboard-browser-picker
 ./scripts/build.sh --install
 ```
 
