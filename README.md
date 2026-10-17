@@ -1,0 +1,108 @@
+# Switchboard
+
+A small menu-bar app for macOS that decides which browser opens each link.
+
+Set Switchboard as your default browser. Every link you click then goes through it. It opens the link in the right browser, Chrome or Brave profile, or private window, or asks you with a quick picker at the cursor.
+
+<p align="center">
+  <img src="docs/picker.png" width="320" alt="The Switchboard picker showing Brave, three Chrome profiles and Safari">
+</p>
+
+## Features
+
+- **Picker at the cursor.** Links without a rule open a small panel next to your mouse. Press `1`–`9` or click a row.
+- **One row per profile.** Chrome, Brave, Edge, Vivaldi, Opera and Chromium profiles each get their own row.
+- **Rules.** Send links to a browser by site, by URL pattern, or by the app you clicked them in.
+- **Remember with ⌘.** Hold `⌘` while picking a browser to always open that site there.
+- **Private windows.** Hold `⌥` while picking, or set a rule to always open privately (Chromium and Firefox families).
+- **No account and no network access.** Your settings stay in one local JSON file.
+
+## Install
+
+1. Download `Switchboard.zip` from the [latest release](../../releases/latest) and unzip it.
+2. Move `Switchboard.app` to `/Applications`.
+3. The app is not notarized. Remove the quarantine flag once:
+   ```bash
+   xattr -dr com.apple.quarantine /Applications/Switchboard.app
+   ```
+4. Open Switchboard. Settings opens on first launch. Click **Make Default** and confirm the macOS prompt.
+
+Requires macOS 14 Sonoma or later. Runs on Apple Silicon and Intel.
+
+## Settings
+
+Open Settings from the menu-bar icon (**Settings…**, `⌘,`), or open the app again from Finder.
+
+<p align="center">
+  <img src="docs/settings.png" width="560" alt="Switchboard settings with four rules">
+</p>
+
+- **Links without a rule:** ask every time, or always use one browser or profile.
+- **Rules:** add, edit, reorder and delete rules. Rules are checked top to bottom, and the first match wins.
+- **Show in picker:** hide apps that registered for web links but aren't browsers.
+
+Each rule matches on any mix of sites, source apps and a URL pattern. A rule matches only when all of its conditions match.
+
+<p align="center">
+  <img src="docs/rule-editor.png" width="480" alt="Editing a rule: zoom.us links clicked in Mail open in Safari">
+</p>
+
+## Picker shortcuts
+
+| Key | Action |
+| --- | --- |
+| `1`–`9` | Open in that row |
+| `Return` | Open in the first row |
+| `⌘` + choice | Open there and always use it for this site |
+| `⌥` + choice | Open in a private window |
+| `⌘C` | Copy the link |
+| `Esc` / click away | Cancel |
+
+Hold `Shift` when you click a link to see the picker, even when a rule matches.
+
+## Config file
+
+Settings saves everything to `~/Library/Application Support/Switchboard/config.json`. Switchboard reads the file on every link, so hand edits apply at once.
+
+```json
+{
+  "defaultTarget": null,
+  "hiddenBrowsers": ["com.example.NotABrowser"],
+  "rules": [
+    { "hosts": ["work.example.com"], "open": { "browser": "com.google.Chrome", "profile": "Profile 1" } },
+    { "urlPattern": "github\\.com/acme-", "open": { "browser": "com.google.Chrome", "profile": "Profile 2" } },
+    { "hosts": ["zoom.us"], "sourceApps": ["com.apple.mail"], "open": { "browser": "com.apple.Safari" } },
+    { "hosts": ["bank.example"], "open": { "browser": "com.brave.Browser", "private": true } }
+  ]
+}
+```
+
+- `hosts` matches the domain and all its subdomains. `example.com` also matches `www.example.com`.
+- `urlPattern` is a case-insensitive regular expression, tested against the full URL.
+- `sourceApps` lists the bundle IDs of the apps the link may come from.
+- `profile` is the Chromium profile directory (`Default`, `Profile 1`, …), not its display name.
+- `defaultTarget` opens unmatched links without the picker. Leave it `null` to always ask.
+
+To find an app's bundle ID, run `osascript -e 'id of app "Google Chrome"'`.
+
+## Build from source
+
+You need Xcode 16 or later (Swift 6).
+
+```bash
+git clone https://github.com/justadityaraj/switchboard.git
+cd switchboard
+./scripts/build.sh --install
+```
+
+`build.sh` runs the self-check and builds a universal release binary. It packages the app as `build/Switchboard.app`, and `--install` copies it to `/Applications`.
+
+| Path | Contents |
+| --- | --- |
+| `Sources/SwitchboardCore` | Rule matching, config parsing, profile discovery and launch flags. No AppKit. |
+| `Sources/Switchboard` | The app: menu-bar item, URL handling, picker and Settings. |
+| `Sources/SwitchboardSelfCheck` | Checks for the core logic. Run with `swift run SwitchboardSelfCheck`. |
+
+## License
+
+[MIT](LICENSE)
