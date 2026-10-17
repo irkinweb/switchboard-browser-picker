@@ -64,13 +64,15 @@ public struct Config: Codable, Equatable {
     public var defaultTarget: Target?
     public var rules: [Rule]
     public var hiddenBrowsers: [String]
+    public var cleanLinks: Bool
 
     public static let empty = Config()
 
-    public init(defaultTarget: Target? = nil, rules: [Rule] = [], hiddenBrowsers: [String] = []) {
+    public init(defaultTarget: Target? = nil, rules: [Rule] = [], hiddenBrowsers: [String] = [], cleanLinks: Bool = true) {
         self.defaultTarget = defaultTarget
         self.rules = rules
         self.hiddenBrowsers = hiddenBrowsers
+        self.cleanLinks = cleanLinks
     }
 
     public init(from decoder: Decoder) throws {
@@ -78,6 +80,7 @@ public struct Config: Codable, Equatable {
         defaultTarget = try container.decodeIfPresent(Target.self, forKey: .defaultTarget)
         rules = try container.decodeIfPresent([Rule].self, forKey: .rules) ?? []
         hiddenBrowsers = try container.decodeIfPresent([String].self, forKey: .hiddenBrowsers) ?? []
+        cleanLinks = try container.decodeIfPresent(Bool.self, forKey: .cleanLinks) ?? true
     }
 
     public func target(for url: URL, sourceApp: String?) -> Target? {

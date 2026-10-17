@@ -9,6 +9,7 @@ Use it to:
 - send Google Meet, Zoom or GitHub links to the browser you keep for them
 - open links from a specific app (like Slack) in a specific browser or profile
 - open some sites in a private or incognito window by default
+- strip tracking junk like `utm_source` and `fbclid`, and skip Outlook SafeLinks and other redirect wrappers
 
 **[Download Switchboard](../../releases/latest)** · [Website](https://dev.adityarajsingh.com/switchboard/) · [Compare Mac browser pickers](https://dev.adityarajsingh.com/switchboard/comparison/)
 
@@ -23,7 +24,8 @@ Use it to:
 - **Rules.** Send links to a browser by site, by URL pattern, or by the app you clicked them in.
 - **Remember with ⌘.** Hold `⌘` while picking a browser to always open that site there.
 - **Private windows.** Hold `⌥` while picking, or set a rule to always open privately (Chromium and Firefox families).
-- **No account and no network access.** Your settings stay in one local JSON file.
+- **Link cleanup.** Removes tracking parameters (`utm_*`, `fbclid`, `gclid`, `msclkid` and more) and unwraps Outlook SafeLinks, Google, Facebook, Instagram, LinkedIn, Slack and YouTube redirect links before your rules run. On by default.
+- **No account and no network access.** Your settings stay in one local JSON file. Link cleanup happens on your Mac and never looks anything up online.
 
 ## Install
 
@@ -45,6 +47,7 @@ Open Settings from the menu-bar icon (**Settings…**, `⌘,`), or open the app 
   <img src="docs/settings.png" width="560" alt="Switchboard settings with four rules">
 </p>
 
+- **Clean links:** turn link cleanup on or off.
 - **Links without a rule:** ask every time, or always use one browser or profile.
 - **Rules:** add, edit, reorder and delete rules. Rules are checked top to bottom, and the first match wins.
 - **Show in picker:** hide apps that registered for web links but aren't browsers.
@@ -74,6 +77,7 @@ Settings saves everything to `~/Library/Application Support/Switchboard/config.j
 
 ```json
 {
+  "cleanLinks": true,
   "defaultTarget": null,
   "hiddenBrowsers": ["com.example.NotABrowser"],
   "rules": [
@@ -90,6 +94,7 @@ Settings saves everything to `~/Library/Application Support/Switchboard/config.j
 - `sourceApps` lists the bundle IDs of the apps the link may come from.
 - `profile` is the Chromium profile directory (`Default`, `Profile 1`, …), not its display name.
 - `defaultTarget` opens unmatched links without the picker. Leave it `null` to always ask.
+- `cleanLinks` removes tracking parameters and unwraps redirect links before rules match. Defaults to `true`.
 
 To find an app's bundle ID, run `osascript -e 'id of app "Google Chrome"'`.
 

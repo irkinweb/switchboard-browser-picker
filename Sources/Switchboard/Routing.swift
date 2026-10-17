@@ -144,8 +144,9 @@ enum Launcher {
 final class Router {
     private let picker = PickerController()
 
-    func route(_ url: URL, sourceApp: String?) {
+    func route(_ incoming: URL, sourceApp: String?) {
         let (config, error) = ConfigStore.load()
+        let url = config.cleanLinks ? LinkCleaner.clean(incoming) : incoming
         let forcePicker = NSEvent.modifierFlags.contains(.shift)
         if !forcePicker,
            let target = config.target(for: url, sourceApp: sourceApp) ?? config.defaultTarget,

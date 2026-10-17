@@ -56,6 +56,20 @@ remembering.remember(host: "www.github.com", target: work)
 check(remembering.rules.count == 2, "remembering replaces the plain rule for that host")
 check(remembering.rules.first == Rule(hosts: ["github.com"], open: work), "remembered rule goes first")
 
+func cleaned(_ string: String) -> String { LinkCleaner.clean(URL(string: string)!).absoluteString }
+check(cleaned("https://example.com/a?utm_source=x&id=7&fbclid=abc") == "https://example.com/a?id=7", "tracking params removed, real ones kept")
+check(cleaned("https://example.com/a?utm_medium=email&gclid=1") == "https://example.com/a", "query dropped when only tracking remains")
+check(cleaned("https://example.com/a?q=hello%20world&utm_campaign=z") == "https://example.com/a?q=hello%20world", "kept values stay percent-encoded")
+check(cleaned("https://youtu.be/abc?si=TRACK&t=42") == "https://youtu.be/abc?t=42", "site-specific param removed, timestamp kept")
+check(cleaned("https://example.com/a?si=keep") == "https://example.com/a?si=keep", "site-specific params only apply to their site")
+check(cleaned("https://nam12.safelinks.protection.outlook.com/?url=https%3A%2F%2Fgithub.com%2Facme%3Futm_source%3Dmail&data=x") == "https://github.com/acme", "SafeLinks unwrapped then cleaned")
+check(cleaned("https://www.google.com/url?q=https://example.com/page&sa=D") == "https://example.com/page", "Google redirect unwrapped")
+check(cleaned("https://l.facebook.com/l.php?u=https%3A%2F%2Fexample.com%2F&h=AT0") == "https://example.com/", "Facebook redirect unwrapped")
+check(cleaned("https://www.google.com/search?q=switchboard") == "https://www.google.com/search?q=switchboard", "non-redirect Google URLs untouched")
+check(cleaned("https://www.google.com/url?q=javascript:alert(1)") == "https://www.google.com/url?q=javascript:alert(1)", "non-http redirect targets are not followed")
+check(cleaned("https://example.com/page#utm_source=x") == "https://example.com/page#utm_source=x", "fragments untouched")
+check(try! JSONDecoder().decode(Config.self, from: Data("{}".utf8)).cleanLinks, "link cleanup defaults to on")
+
 if failures > 0 {
     print("\(failures) check(s) failed")
     exit(1)

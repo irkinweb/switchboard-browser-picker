@@ -156,6 +156,10 @@ struct SettingsView: View {
                         Button("Make Default") { model.makeDefault() }
                     }
                 }
+                Toggle(isOn: $model.config.cleanLinks) {
+                    Text("Clean links")
+                    Text("Remove tracking parameters like utm_source and fbclid, and unwrap Outlook, Google, Facebook and Slack redirect links before opening.")
+                }
                 Picker("Links without a rule", selection: model.defaultTargetID) {
                     Text("Ask me every time").tag("")
                     Divider()
