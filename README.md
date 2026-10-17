@@ -19,8 +19,8 @@ Set Switchboard as your default browser. Every link you click then goes through 
 
 ## Install
 
-1. Download `Switchboard.zip` from the [latest release](../../releases/latest) and unzip it.
-2. Move `Switchboard.app` to `/Applications`.
+1. Download `Switchboard.dmg` from the [latest release](../../releases/latest).
+2. Open it and drag Switchboard into Applications.
 3. The app is not notarized. Remove the quarantine flag once:
    ```bash
    xattr -dr com.apple.quarantine /Applications/Switchboard.app
@@ -95,7 +95,7 @@ cd switchboard
 ./scripts/build.sh --install
 ```
 
-`build.sh` runs the self-check and builds a universal release binary. It packages the app as `build/Switchboard.app`, and `--install` copies it to `/Applications`.
+`build.sh` runs the self-check and builds a universal release binary. It packages the app as `build/Switchboard.app`. `--install` copies it to `/Applications`, and `--release` also writes `build/Switchboard.dmg` and `build/Switchboard.zip`.
 
 | Path | Contents |
 | --- | --- |
