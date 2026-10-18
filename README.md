@@ -13,6 +13,8 @@ Use it to:
 
 **[Download Switchboard](../../releases/latest)** · [Website](https://dev.adityarajsingh.com/switchboard/) · [Compare Mac browser pickers](https://dev.adityarajsingh.com/switchboard/comparison/)
 
+https://github.com/user-attachments/assets/ff1d79e7-b350-4fae-b66b-3ff6fc28645f
+
 <p align="center">
   <img src="docs/picker.png" width="320" alt="The Switchboard picker showing Brave, three Chrome profiles and Safari">
 </p>
