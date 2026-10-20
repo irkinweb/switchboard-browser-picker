@@ -35,25 +35,12 @@ https://github.com/user-attachments/assets/ff1d79e7-b350-4fae-b66b-3ff6fc28645f
 
 1. Download `Switchboard.dmg` from the [latest release](../../releases/latest).
 2. Open it and drag Switchboard into Applications.
-3. Open Switchboard. Settings opens on first launch. Click **Make Default** and confirm the macOS prompt.
+3. Open Switchboard. If macOS asks whether to open an app downloaded from the internet, click **Open**.
+4. Settings opens on first launch. Click **Make Default** and confirm the macOS prompt.
 
-#### First launch: "Switchboard.app Not Opened"
+### Option 2: Homebrew
 
-Switchboard isn't notarized by Apple, so the first time you open it macOS shows this. Click **Done**.
-
-<p align="center">
-  <img src="docs/first-launch-blocked.png" width="252" alt="macOS dialog: Switchboard.app Not Opened. Apple could not verify Switchboard.app is free of malware.">
-</p>
-
-Then open **System Settings → Privacy & Security**, scroll down to **Security**, and click **Open Anyway**. Confirm with Touch ID or your password, then click **Open**. You only do this once.
-
-<p align="center">
-  <img src="docs/first-launch-open-anyway.png" width="620" alt="System Settings, Privacy and Security: Switchboard.app was blocked to protect your Mac, with the Open Anyway button highlighted">
-</p>
-
-### Option 2: Homebrew (no security prompt)
-
-Homebrew builds Switchboard on your own Mac, so macOS never shows the dialog above.
+Homebrew builds Switchboard from source on your Mac.
 
 ```bash
 brew install justadityaraj/tap/switchboard
@@ -140,6 +127,12 @@ cd switchboard-browser-picker
 | `Sources/SwitchboardCore` | Rule matching, config parsing, profile discovery and launch flags. No AppKit. |
 | `Sources/Switchboard` | The app: menu-bar item, URL handling, picker and Settings. |
 | `Sources/SwitchboardSelfCheck` | Checks for the core logic. Run with `swift run SwitchboardSelfCheck`. |
+
+## Signing
+
+Releases from 0.2.1 on are signed with a Developer ID certificate and notarized by Apple, so they open without a security warning. The certificate belongs to the Apple Developer account of Swagloop Ventures Private Limited, a company I'm a director of. It's the developer account I already have, and it saves you the Open Anyway step.
+
+Switchboard is still my personal project. Swagloop doesn't own it, fund it or receive any data from it, and the MIT license covers all of it. If a future release is signed under a different account, nothing changes in how you install or use it. Homebrew builds aren't affected either way, because they're built on your own Mac.
 
 ## License
 
