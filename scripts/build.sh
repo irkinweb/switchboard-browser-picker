@@ -30,6 +30,13 @@ fi
 
 if [[ "${1:-}" == "--release" ]]; then
   rm -f build/Switchboard.zip build/Switchboard.dmg
+  notarize() { xcrun notarytool submit "$1" --keychain-profile "${NOTARY_PROFILE:-foldout}" --wait; }
+  if [[ "$identity" != "-" ]]; then
+    ditto -c -k --keepParent "$app" build/Switchboard.zip
+    notarize build/Switchboard.zip
+    xcrun stapler staple "$app"
+  fi
+  ditto -c -k --norsrc --noextattr --noqtn --keepParent "$app" build/Switchboard.zip
   staging=$(mktemp -d)
   cp -R "$app" "$staging/"
   ln -s /Applications "$staging/Applications"
@@ -37,10 +44,8 @@ if [[ "${1:-}" == "--release" ]]; then
   rm -rf "$staging"
   if [[ "$identity" != "-" ]]; then
     codesign --force --sign "$identity" --timestamp build/Switchboard.dmg
-    xcrun notarytool submit build/Switchboard.dmg --keychain-profile "${NOTARY_PROFILE:-foldout}" --wait
+    notarize build/Switchboard.dmg
     xcrun stapler staple build/Switchboard.dmg
-    xcrun stapler staple "$app"
   fi
-  ditto -c -k --norsrc --noextattr --noqtn --keepParent "$app" build/Switchboard.zip
   echo "Packaged build/Switchboard.zip and build/Switchboard.dmg"
 fi
