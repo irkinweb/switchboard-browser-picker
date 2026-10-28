@@ -73,17 +73,17 @@ final class SettingsModel: ObservableObject {
         config.rules.swapAt(index, destination)
     }
 
-    func moveOptions(from source: IndexSet, to destination: Int) {
+    func moveOption(_ id: String, onto targetID: String) {
         var ids = options.map(\.id)
-        ids.move(fromOffsets: source, toOffset: destination)
+        guard id != targetID, let from = ids.firstIndex(of: id), let to = ids.firstIndex(of: targetID) else { return }
+        ids.insert(ids.remove(at: from), at: to)
         config.pickerOrder = ids
         refreshEnvironment()
     }
 
     func moveOption(at index: Int, by offset: Int) {
-        let destination = index + offset
-        guard options.indices.contains(index), options.indices.contains(destination) else { return }
-        moveOptions(from: IndexSet(integer: index), to: offset > 0 ? destination + 1 : destination)
+        guard options.indices.contains(index), options.indices.contains(index + offset) else { return }
+        moveOption(options[index].id, onto: options[index + offset].id)
     }
 
     func hiddenBinding(for bundleID: String) -> Binding<Bool> {
@@ -154,6 +154,7 @@ struct RuleDraft: Identifiable {
 struct SettingsView: View {
     @ObservedObject var model: SettingsModel
     @State private var draft: RuleDraft?
+    @State private var dropTarget: String?
 
     var body: some View {
         Form {
@@ -227,6 +228,7 @@ struct SettingsView: View {
             Section {
                 ForEach(Array(model.options.enumerated()), id: \.element.id) { index, option in
                     HStack {
+                        Image(systemName: "line.3.horizontal").foregroundStyle(.tertiary)
                         Label { Text(option.title) } icon: { Image(nsImage: option.smallIcon) }
                         Spacer()
                         Menu {
@@ -239,8 +241,17 @@ struct SettingsView: View {
                         .menuIndicator(.hidden)
                         .fixedSize()
                     }
+                    .padding(.vertical, 2)
+                    .background(dropTarget == option.id ? Color.accentColor.opacity(0.18) : .clear, in: RoundedRectangle(cornerRadius: 6))
+                    .draggable(option.id)
+                    .dropDestination(for: String.self) { items, _ in
+                        guard let id = items.first else { return false }
+                        model.moveOption(id, onto: option.id)
+                        return true
+                    } isTargeted: { targeted in
+                        if targeted { dropTarget = option.id } else if dropTarget == option.id { dropTarget = nil }
+                    }
                 }
-                .onMove { model.moveOptions(from: $0, to: $1) }
             } header: {
                 Text("Picker order")
             } footer: {
