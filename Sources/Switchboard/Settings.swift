@@ -28,7 +28,7 @@ final class SettingsModel: ObservableObject {
     }
 
     func refreshEnvironment() {
-        options = Browsers.options(hiding: [])
+        options = Browsers.options(hiding: [], order: config)
         isDefaultBrowser = DefaultBrowser.isSwitchboard
     }
 
@@ -71,6 +71,19 @@ final class SettingsModel: ObservableObject {
         let destination = index + offset
         guard config.rules.indices.contains(index), config.rules.indices.contains(destination) else { return }
         config.rules.swapAt(index, destination)
+    }
+
+    func moveOptions(from source: IndexSet, to destination: Int) {
+        var ids = options.map(\.id)
+        ids.move(fromOffsets: source, toOffset: destination)
+        config.pickerOrder = ids
+        refreshEnvironment()
+    }
+
+    func moveOption(at index: Int, by offset: Int) {
+        let destination = index + offset
+        guard options.indices.contains(index), options.indices.contains(destination) else { return }
+        moveOptions(from: IndexSet(integer: index), to: offset > 0 ? destination + 1 : destination)
     }
 
     func hiddenBinding(for bundleID: String) -> Binding<Bool> {
@@ -207,6 +220,31 @@ struct SettingsView: View {
                 }
             } footer: {
                 Text("Rules are checked top to bottom; the first match wins. Hold Shift when clicking a link to see the picker anyway.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section {
+                ForEach(Array(model.options.enumerated()), id: \.element.id) { index, option in
+                    HStack {
+                        Label { Text(option.title) } icon: { Image(nsImage: option.smallIcon) }
+                        Spacer()
+                        Menu {
+                            Button("Move Up") { model.moveOption(at: index, by: -1) }.disabled(index == 0)
+                            Button("Move Down") { model.moveOption(at: index, by: 1) }.disabled(index == model.options.count - 1)
+                        } label: {
+                            Image(systemName: "ellipsis.circle")
+                        }
+                        .menuStyle(.borderlessButton)
+                        .menuIndicator(.hidden)
+                        .fixedSize()
+                    }
+                }
+                .onMove { model.moveOptions(from: $0, to: $1) }
+            } header: {
+                Text("Picker order")
+            } footer: {
+                Text("Drag rows or use the menu to reorder browsers and profiles. The first nine get the keys 1–9.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

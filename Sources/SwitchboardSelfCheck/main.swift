@@ -37,6 +37,11 @@ let decoded = try! JSONDecoder().decode(Config.self, from: Data(json.utf8))
 check(decoded.rules.first?.open == Target(browser: "com.brave.Browser", profile: "Default", privateWindow: true), "config decodes with missing keys")
 check(decoded.hiddenBrowsers.isEmpty && decoded.defaultTarget == nil, "missing keys fall back to empty")
 
+let orderConfig = Config(pickerOrder: ["c", "a", "gone"])
+check(orderConfig.ordered(["a", "b", "c", "d"], id: { $0 }) == ["c", "a", "b", "d"], "picker order puts listed items first, rest keep order")
+check(Config.empty.ordered(["a", "b"], id: { $0 }) == ["a", "b"], "empty picker order keeps default order")
+check(decoded.pickerOrder.isEmpty, "missing pickerOrder falls back to empty")
+
 check(BrowserFamily.launchFlags(for: Target(browser: "com.google.Chrome", profile: "Profile 2", privateWindow: true)) == ["--profile-directory=Profile 2", "--incognito"], "chromium flags")
 check(BrowserFamily.launchFlags(for: Target(browser: "org.mozilla.firefox", privateWindow: true)) == ["--private-window"], "firefox private flag")
 check(BrowserFamily.launchFlags(for: Target(browser: "com.apple.Safari", privateWindow: true)).isEmpty, "safari takes no flags")

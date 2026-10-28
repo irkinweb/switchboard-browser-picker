@@ -64,14 +64,16 @@ public struct Config: Codable, Equatable {
     public var defaultTarget: Target?
     public var rules: [Rule]
     public var hiddenBrowsers: [String]
+    public var pickerOrder: [String]
     public var cleanLinks: Bool
 
     public static let empty = Config()
 
-    public init(defaultTarget: Target? = nil, rules: [Rule] = [], hiddenBrowsers: [String] = [], cleanLinks: Bool = true) {
+    public init(defaultTarget: Target? = nil, rules: [Rule] = [], hiddenBrowsers: [String] = [], pickerOrder: [String] = [], cleanLinks: Bool = true) {
         self.defaultTarget = defaultTarget
         self.rules = rules
         self.hiddenBrowsers = hiddenBrowsers
+        self.pickerOrder = pickerOrder
         self.cleanLinks = cleanLinks
     }
 
@@ -80,11 +82,21 @@ public struct Config: Codable, Equatable {
         defaultTarget = try container.decodeIfPresent(Target.self, forKey: .defaultTarget)
         rules = try container.decodeIfPresent([Rule].self, forKey: .rules) ?? []
         hiddenBrowsers = try container.decodeIfPresent([String].self, forKey: .hiddenBrowsers) ?? []
+        pickerOrder = try container.decodeIfPresent([String].self, forKey: .pickerOrder) ?? []
         cleanLinks = try container.decodeIfPresent(Bool.self, forKey: .cleanLinks) ?? true
     }
 
     public func target(for url: URL, sourceApp: String?) -> Target? {
         rules.first { $0.matches(url: url, sourceApp: sourceApp) }?.open
+    }
+
+    /// Puts items listed in `pickerOrder` first, in that order; anything not listed keeps its original order after them.
+    public func ordered<T>(_ items: [T], id: (T) -> String) -> [T] {
+        let position = Dictionary(pickerOrder.enumerated().map { ($1, $0) }, uniquingKeysWith: { first, _ in first })
+        let listed = items.enumerated().filter { position[id($1)] != nil }
+            .sorted { position[id($0.element)]! < position[id($1.element)]! }
+        let rest = items.enumerated().filter { position[id($1)] == nil }
+        return (listed + rest).map(\.element)
     }
 
     public mutating func remember(host: String, target: Target) {
