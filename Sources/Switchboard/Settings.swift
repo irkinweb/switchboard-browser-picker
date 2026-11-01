@@ -249,11 +249,8 @@ struct SettingsView: View {
             Section {
                 ForEach(Array(model.options.enumerated()), id: \.element.id) { index, option in
                     let appHidden = model.config.hiddenBrowsers.contains(option.target.browser)
-                    HStack(spacing: 8) {
-                        Toggle("", isOn: model.profileVisibleBinding(for: option))
-                            .toggleStyle(.checkbox)
-                            .labelsHidden()
-                            .disabled(appHidden)
+                    HStack(spacing: 10) {
+                        Image(systemName: "line.3.horizontal").foregroundStyle(.tertiary)
                         Label { Text(option.title) } icon: { Image(nsImage: option.smallIcon) }
                             .opacity(appHidden ? 0.5 : 1)
                         Spacer()
@@ -266,9 +263,13 @@ struct SettingsView: View {
                         .menuStyle(.borderlessButton)
                         .menuIndicator(.hidden)
                         .fixedSize()
-                        Image(systemName: "line.3.horizontal").foregroundStyle(.tertiary)
+                        Toggle("", isOn: model.profileVisibleBinding(for: option))
+                            .toggleStyle(.switch)
+                            .labelsHidden()
+                            .disabled(appHidden)
                     }
-                    .padding(.vertical, 3)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 10)
                     .frame(maxWidth: .infinity)
                     .background(dropTarget == option.id && dragging != option.id ? Color.accentColor.opacity(0.15) : .clear)
                     .overlay(alignment: dropsAbove(index) ? .top : .bottom) {
@@ -284,6 +285,7 @@ struct SettingsView: View {
                     .onDrop(of: [.plainText], delegate: OptionDropDelegate(id: option.id, dragging: $dragging, target: $dropTarget) {
                         model.moveOption($0, onto: $1)
                     })
+                    .listRowInsets(EdgeInsets())
                 }
             } header: {
                 Text("Picker order")
