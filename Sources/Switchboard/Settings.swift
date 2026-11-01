@@ -247,6 +247,7 @@ struct SettingsView: View {
             }
 
             Section {
+                VStack(spacing: 0) {
                 ForEach(Array(model.options.enumerated()), id: \.element.id) { index, option in
                     let appHidden = model.config.hiddenBrowsers.contains(option.target.browser)
                     HStack(spacing: 10) {
@@ -269,13 +270,16 @@ struct SettingsView: View {
                             .disabled(appHidden)
                     }
                     .padding(.horizontal, 10)
-                    .padding(.vertical, 10)
+                    .padding(.vertical, 7)
                     .frame(maxWidth: .infinity)
                     .background(dropTarget == option.id && dragging != option.id ? Color.accentColor.opacity(0.15) : .clear)
                     .overlay(alignment: dropsAbove(index) ? .top : .bottom) {
                         if dropTarget == option.id, dragging != option.id {
                             Capsule().fill(Color.accentColor).frame(height: 3)
                         }
+                    }
+                    .overlay(alignment: .bottom) {
+                        if index < model.options.count - 1 { Divider() }
                     }
                     .contentShape(Rectangle())
                     .onDrag {
@@ -285,12 +289,13 @@ struct SettingsView: View {
                     .onDrop(of: [.plainText], delegate: OptionDropDelegate(id: option.id, dragging: $dragging, target: $dropTarget) {
                         model.moveOption($0, onto: $1)
                     })
-                    .listRowInsets(EdgeInsets())
                 }
+                }
+                .listRowInsets(EdgeInsets())
             } header: {
                 Text("Picker order")
             } footer: {
-                Text("Drag a row onto another to move it there, or use the menu. Untick a profile to hide it from the picker. The first nine get the keys 1–9; the rest go under Others.")
+                Text("Drag a row onto another to move it there, or use the menu. Turn a profile off to hide it from the picker. The first nine get the keys 1–9; the rest go under Others.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
