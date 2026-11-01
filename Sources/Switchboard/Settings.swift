@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import UniformTypeIdentifiers
 import SwitchboardCore
 
 @MainActor
@@ -86,6 +87,19 @@ final class SettingsModel: ObservableObject {
         moveOption(options[index].id, onto: options[index + offset].id)
     }
 
+    func profileVisibleBinding(for option: BrowserOption) -> Binding<Bool> {
+        Binding(
+            get: { !self.config.hiddenProfiles.contains(option.id) && !self.config.hiddenBrowsers.contains(option.target.browser) },
+            set: { visible in
+                if visible {
+                    self.config.hiddenProfiles.removeAll { $0 == option.id }
+                } else if !self.config.hiddenProfiles.contains(option.id) {
+                    self.config.hiddenProfiles.append(option.id)
+                }
+            }
+        )
+    }
+
     func hiddenBinding(for bundleID: String) -> Binding<Bool> {
         Binding(
             get: { !self.config.hiddenBrowsers.contains(bundleID) },
@@ -155,6 +169,13 @@ struct SettingsView: View {
     @ObservedObject var model: SettingsModel
     @State private var draft: RuleDraft?
     @State private var dropTarget: String?
+    @State private var dragging: String?
+
+    /// The dragged row takes the target's place, so the indicator sits on the side it comes from.
+    private func dropsAbove(_ targetIndex: Int) -> Bool {
+        guard let dragging, let from = model.options.firstIndex(where: { $0.id == dragging }) else { return true }
+        return from > targetIndex
+    }
 
     var body: some View {
         Form {
@@ -227,9 +248,14 @@ struct SettingsView: View {
 
             Section {
                 ForEach(Array(model.options.enumerated()), id: \.element.id) { index, option in
-                    HStack {
-                        Image(systemName: "line.3.horizontal").foregroundStyle(.tertiary)
+                    let appHidden = model.config.hiddenBrowsers.contains(option.target.browser)
+                    HStack(spacing: 8) {
+                        Toggle("", isOn: model.profileVisibleBinding(for: option))
+                            .toggleStyle(.checkbox)
+                            .labelsHidden()
+                            .disabled(appHidden)
                         Label { Text(option.title) } icon: { Image(nsImage: option.smallIcon) }
+                            .opacity(appHidden ? 0.5 : 1)
                         Spacer()
                         Menu {
                             Button("Move Up") { model.moveOption(at: index, by: -1) }.disabled(index == 0)
@@ -240,22 +266,29 @@ struct SettingsView: View {
                         .menuStyle(.borderlessButton)
                         .menuIndicator(.hidden)
                         .fixedSize()
+                        Image(systemName: "line.3.horizontal").foregroundStyle(.tertiary)
                     }
-                    .padding(.vertical, 2)
-                    .background(dropTarget == option.id ? Color.accentColor.opacity(0.18) : .clear, in: RoundedRectangle(cornerRadius: 6))
-                    .draggable(option.id)
-                    .dropDestination(for: String.self) { items, _ in
-                        guard let id = items.first else { return false }
-                        model.moveOption(id, onto: option.id)
-                        return true
-                    } isTargeted: { targeted in
-                        if targeted { dropTarget = option.id } else if dropTarget == option.id { dropTarget = nil }
+                    .padding(.vertical, 3)
+                    .frame(maxWidth: .infinity)
+                    .background(dropTarget == option.id && dragging != option.id ? Color.accentColor.opacity(0.15) : .clear)
+                    .overlay(alignment: dropsAbove(index) ? .top : .bottom) {
+                        if dropTarget == option.id, dragging != option.id {
+                            Capsule().fill(Color.accentColor).frame(height: 3)
+                        }
                     }
+                    .contentShape(Rectangle())
+                    .onDrag {
+                        dragging = option.id
+                        return NSItemProvider(object: option.id as NSString)
+                    }
+                    .onDrop(of: [.plainText], delegate: OptionDropDelegate(id: option.id, dragging: $dragging, target: $dropTarget) {
+                        model.moveOption($0, onto: $1)
+                    })
                 }
             } header: {
                 Text("Picker order")
             } footer: {
-                Text("Drag rows or use the menu to reorder browsers and profiles. The first nine get the keys 1–9.")
+                Text("Drag a row onto another to move it there, or use the menu. Untick a profile to hide it from the picker. The first nine get the keys 1–9; the rest go under Others.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -279,6 +312,24 @@ struct SettingsView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             model.reload()
         }
+    }
+}
+
+struct OptionDropDelegate: DropDelegate {
+    let id: String
+    @Binding var dragging: String?
+    @Binding var target: String?
+    let move: (String, String) -> Void
+
+    func dropEntered(info: DropInfo) { target = id }
+    func dropExited(info: DropInfo) { if target == id { target = nil } }
+    func dropUpdated(info: DropInfo) -> DropProposal? { DropProposal(operation: .move) }
+
+    func performDrop(info: DropInfo) -> Bool {
+        defer { dragging = nil; target = nil }
+        guard let dragging else { return false }
+        move(dragging, id)
+        return true
     }
 }
 

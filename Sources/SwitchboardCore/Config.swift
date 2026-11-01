@@ -65,15 +65,17 @@ public struct Config: Codable, Equatable {
     public var rules: [Rule]
     public var hiddenBrowsers: [String]
     public var pickerOrder: [String]
+    public var hiddenProfiles: [String]
     public var cleanLinks: Bool
 
     public static let empty = Config()
 
-    public init(defaultTarget: Target? = nil, rules: [Rule] = [], hiddenBrowsers: [String] = [], pickerOrder: [String] = [], cleanLinks: Bool = true) {
+    public init(defaultTarget: Target? = nil, rules: [Rule] = [], hiddenBrowsers: [String] = [], pickerOrder: [String] = [], hiddenProfiles: [String] = [], cleanLinks: Bool = true) {
         self.defaultTarget = defaultTarget
         self.rules = rules
         self.hiddenBrowsers = hiddenBrowsers
         self.pickerOrder = pickerOrder
+        self.hiddenProfiles = hiddenProfiles
         self.cleanLinks = cleanLinks
     }
 
@@ -83,6 +85,7 @@ public struct Config: Codable, Equatable {
         rules = try container.decodeIfPresent([Rule].self, forKey: .rules) ?? []
         hiddenBrowsers = try container.decodeIfPresent([String].self, forKey: .hiddenBrowsers) ?? []
         pickerOrder = try container.decodeIfPresent([String].self, forKey: .pickerOrder) ?? []
+        hiddenProfiles = try container.decodeIfPresent([String].self, forKey: .hiddenProfiles) ?? []
         cleanLinks = try container.decodeIfPresent(Bool.self, forKey: .cleanLinks) ?? true
     }
 

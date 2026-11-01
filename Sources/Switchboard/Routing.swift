@@ -80,7 +80,7 @@ enum InstalledApps {
 }
 
 enum Browsers {
-    static func options(hiding hidden: [String], order: Config = .empty) -> [BrowserOption] {
+    static func options(hiding hidden: [String], hidingProfiles: [String] = [], order: Config = .empty) -> [BrowserOption] {
         let probe = URL(string: "https://example.com")!
         var seen = Set<String>()
         let apps = NSWorkspace.shared.urlsForApplications(toOpen: probe).compactMap { appURL -> (URL, String, String)? in
@@ -112,7 +112,7 @@ enum Browsers {
                     )
                 }
             }
-        return order.ordered(options, id: \.id)
+        return order.ordered(options.filter { !hidingProfiles.contains($0.id) }, id: \.id)
     }
 
     private static func chromiumProfiles(for bundleID: String) -> [BrowserProfile] {
@@ -154,6 +154,6 @@ final class Router {
            Launcher.open(url, in: target) {
             return
         }
-        picker.show(url: url, options: Browsers.options(hiding: config.hiddenBrowsers, order: config), notice: error)
+        picker.show(url: url, options: Browsers.options(hiding: config.hiddenBrowsers, hidingProfiles: config.hiddenProfiles, order: config), notice: error)
     }
 }
